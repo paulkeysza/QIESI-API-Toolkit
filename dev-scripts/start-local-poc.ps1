@@ -35,6 +35,7 @@ if ($portInUse) {
 }
 
 $baseUrl = "http://127.0.0.1:$selectedPort"
+$env:QIESI_PUBLIC_BASE_URL = $baseUrl
 $localOrigins = @(
     $baseUrl,
     "http://localhost:$selectedPort",

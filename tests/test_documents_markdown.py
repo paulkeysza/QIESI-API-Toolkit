@@ -8,6 +8,13 @@ import main
 client = TestClient(main.app)
 
 
+def test_openapi_includes_server_url():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+    assert response.json()["servers"][0]["url"].startswith("http://127.0.0.1:")
+
+
 def test_documents_markdown_requires_file_or_payload():
     response = client.post("/documents/markdown")
 

@@ -119,6 +119,7 @@ Copy `.env.example` to `.env` if you want to configure local settings outside yo
 
 - `QIESI_CORS_ORIGINS`: comma-separated local origins allowed to call the API. Defaults to `http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:8000,http://localhost:8000`.
 - `QIESI_MAX_UPLOAD_BYTES`: maximum document upload size in bytes. Defaults to `26214400` (25 MB).
+- `QIESI_PUBLIC_BASE_URL`: absolute base URL advertised in OpenAPI metadata for REST clients such as K2. The interactive launcher sets this from the selected port.
 - `AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT` and `AZURE_API_KEY`: optional OCR support for `/documents/markdown/ocr`.
 
 ## Endpoints

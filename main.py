@@ -29,9 +29,13 @@ load_dotenv()
 
 logger = logging.getLogger("qiesi-api-toolkit")
 
+PUBLIC_BASE_URL_ENV = "QIESI_PUBLIC_BASE_URL"
+public_base_url = os.getenv(PUBLIC_BASE_URL_ENV, "http://127.0.0.1:8000").rstrip("/")
+
 app = FastAPI(
     title="Qiesi API Toolkit",
     version="1.1.3",
+    servers=[{"url": public_base_url, "description": "QIESI API Toolkit"}],
     description="""
 A lightweight API toolkit providing:
 

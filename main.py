@@ -461,7 +461,6 @@ async def document_to_markdown(
         "then returns explicit Markdown response properties."
     ),
     response_model=DocumentMarkdownResponse,
-    operation_id="convert_document_to_markdown_k2",
 )
 def document_to_markdown_k2(payload: DocumentBase64Request):
     return _convert_document_to_markdown(
@@ -526,3 +525,20 @@ def message_to_csv(req: MessageCSVRequest):
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+_default_openapi = app.openapi
+
+
+def _k2_compatible_openapi():
+    schema = _default_openapi()
+    response_schema = schema.get("components", {}).get("schemas", {}).get("DocumentMarkdownResponse")
+    operation = schema.get("paths", {}).get("/documents/markdown/k2", {}).get("post")
+
+    if response_schema and operation:
+        operation["responses"]["200"]["content"]["application/json"]["schema"] = response_schema
+
+    return schema
+
+
+app.openapi = _k2_compatible_openapi

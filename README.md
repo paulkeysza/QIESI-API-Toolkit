@@ -363,7 +363,7 @@ Response:
 }
 ```
 
-In K2, generate the Object Type for `DocumentBase64Request` and the Service Operation named `convert_document_to_markdown_k2`. Use the Service Operation SmartObject to execute the API call.
+In K2, generate the Object Type for `DocumentBase64Request` and the Service Operation named `document_to_markdown_k2_documents_markdown_k2_post`. Use the Service Operation SmartObject to execute the API call.
 
 ---
 

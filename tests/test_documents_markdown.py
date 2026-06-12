@@ -19,11 +19,17 @@ def test_openapi_exposes_k2_json_contract():
     response = client.get("/openapi.json")
     operation = response.json()["paths"]["/documents/markdown/k2"]["post"]
 
-    assert operation["operationId"] == "convert_document_to_markdown_k2"
+    assert operation["operationId"] == "document_to_markdown_k2_documents_markdown_k2_post"
     assert "application/json" in operation["requestBody"]["content"]
-    assert operation["responses"]["200"]["content"]["application/json"]["schema"]["$ref"].endswith(
-        "/DocumentMarkdownResponse"
-    )
+    response_schema = operation["responses"]["200"]["content"]["application/json"]["schema"]
+    assert response_schema["type"] == "object"
+    assert set(response_schema["properties"]) == {
+        "fileName",
+        "contentType",
+        "markdown",
+        "textLength",
+        "success",
+    }
 
 
 def test_documents_markdown_requires_file_or_payload():

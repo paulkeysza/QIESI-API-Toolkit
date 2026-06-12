@@ -365,6 +365,14 @@ Response:
 
 In K2, generate the Object Type for `DocumentBase64Request` and the Service Operation named `document_to_markdown_k2_documents_markdown_k2_post`. Use the Service Operation SmartObject to execute the API call.
 
+For K2 REST Broker versions that ignore nested paths sharing the `/documents/markdown` prefix, use the equivalent top-level operation:
+
+```text
+POST /K2-Markdown
+```
+
+Its generated operation ID is `k2_document_to_markdown_K2_Markdown_post`. This is the preferred operation for K2 SmartObject generation.
+
 ---
 
 ## Test API front end

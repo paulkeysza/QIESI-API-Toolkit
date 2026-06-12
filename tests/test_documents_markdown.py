@@ -31,6 +31,19 @@ def test_openapi_exposes_k2_json_contract():
         "success",
     }
 
+    top_level_operation = response.json()["paths"]["/K2-Markdown"]["post"]
+    assert top_level_operation["operationId"] == "k2_document_to_markdown_K2_Markdown_post"
+    assert "application/json" in top_level_operation["requestBody"]["content"]
+    assert set(
+        top_level_operation["responses"]["200"]["content"]["application/json"]["schema"]["properties"]
+    ) == {
+        "fileName",
+        "contentType",
+        "markdown",
+        "textLength",
+        "success",
+    }
+
 
 def test_documents_markdown_requires_file_or_payload():
     response = client.post("/documents/markdown")
@@ -159,6 +172,31 @@ def test_documents_markdown_k2_success(monkeypatch):
     assert response.status_code == 200
     assert response.json()["markdown"] == "# K2 report"
     assert response.json()["textLength"] == 11
+
+
+def test_top_level_k2_markdown_success(monkeypatch):
+    monkeypatch.setattr(
+        main,
+        "_convert_document_to_markdown",
+        lambda file_bytes, file_name, content_type: {
+            "fileName": file_name,
+            "contentType": "application/pdf",
+            "markdown": "# Top-level K2 report",
+            "textLength": 21,
+            "success": True,
+        },
+    )
+
+    response = client.post(
+        "/K2-Markdown",
+        json={
+            "fileName": "incident-report.pdf",
+            "fileContentBase64": base64.b64encode(b"%PDF-1.4\n%%EOF").decode("ascii"),
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["markdown"] == "# Top-level K2 report"
 
 
 def test_documents_markdown_rejects_incomplete_json_payload():

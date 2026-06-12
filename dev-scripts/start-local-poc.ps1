@@ -91,6 +91,7 @@ try {
     Write-Host "Ping             $baseUrl/ping"
     Write-Host "Document Markdown POST $baseUrl/documents/markdown"
     Write-Host "K2 Markdown       POST $baseUrl/documents/markdown/k2"
+    Write-Host "K2 SmartObject    POST $baseUrl/K2-Markdown"
     Write-Host "Document OCR      POST $baseUrl/documents/markdown/ocr"
     Write-Host "JSON to Excel     POST $baseUrl/JSON-to-XLSX"
     Write-Host "Text to CSV       POST $baseUrl/TXT-to-CSV"

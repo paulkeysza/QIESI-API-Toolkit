@@ -372,6 +372,7 @@ def info():
             "text_to_csv": "/TXT-to-CSV",
             "document_to_markdown": "/documents/markdown",
             "document_to_markdown_k2": "/documents/markdown/k2",
+            "k2_markdown": "/K2-Markdown",
             "document_to_markdown_ocr": "/documents/markdown/ocr",
             "document_markdown_test_ui": "/test-api/",
             "docs": "/docs",
@@ -471,6 +472,23 @@ def document_to_markdown_k2(payload: DocumentBase64Request):
 
 
 @app.post(
+    "/K2-Markdown",
+    tags=["K2 Conversion"],
+    summary="K2 PDF-to-Markdown",
+    description=(
+        "Top-level K2 REST Broker operation accepting a file name and Base64 document content."
+    ),
+    response_model=DocumentMarkdownResponse,
+)
+def k2_document_to_markdown(payload: DocumentBase64Request):
+    return _convert_document_to_markdown(
+        file_bytes=_decode_base64_file_content(payload.fileContentBase64),
+        file_name=payload.fileName,
+        content_type=None,
+    )
+
+
+@app.post(
     "/documents/markdown/ocr",
     tags=["Document Conversion"],
     summary="Document OCR-to-Markdown",
@@ -533,10 +551,13 @@ _default_openapi = app.openapi
 def _k2_compatible_openapi():
     schema = _default_openapi()
     response_schema = schema.get("components", {}).get("schemas", {}).get("DocumentMarkdownResponse")
-    operation = schema.get("paths", {}).get("/documents/markdown/k2", {}).get("post")
+    k2_paths = ["/documents/markdown/k2", "/K2-Markdown"]
 
-    if response_schema and operation:
-        operation["responses"]["200"]["content"]["application/json"]["schema"] = response_schema
+    if response_schema:
+        for path in k2_paths:
+            operation = schema.get("paths", {}).get(path, {}).get("post")
+            if operation:
+                operation["responses"]["200"]["content"]["application/json"]["schema"] = response_schema
 
     return schema
 

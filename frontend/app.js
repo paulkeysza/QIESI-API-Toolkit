@@ -14,6 +14,10 @@ const clearButton = document.getElementById("clearButton");
 let selectedFile = null;
 let lastMarkdown = "";
 
+if (window.location.pathname.startsWith("/test-api/")) {
+  apiBaseUrl.value = window.location.origin;
+}
+
 function setStatus(text, type = "") {
   statusPill.textContent = text;
   message.textContent = type === "error" ? text : "";

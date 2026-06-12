@@ -91,6 +91,20 @@ From the repository root:
 .\dev-scripts\run-tests.ps1
 ```
 
+For an interactive K2/Nintex POC launcher that prompts for a port and prints every local endpoint URL:
+
+```powershell
+.\dev-scripts\start-local-poc.ps1
+```
+
+Press Enter to use port `8000`, or enter another available port. The script waits for the health endpoint before printing the Test UI, Swagger, OpenAPI, conversion, and system URLs. Press `Ctrl+C` to stop the backend.
+
+For repeatable launches without the prompt, pass the port directly:
+
+```powershell
+.\dev-scripts\start-local-poc.ps1 -Port 8123
+```
+
 To run the test front end as a separate static site:
 
 ```powershell

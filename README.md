@@ -43,6 +43,8 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+The requirements include MarkItDown's PDF extra, which is required by `/documents/markdown` for PDF reports.
+
 ### Optional OCR support
 
 To enable Azure Document Intelligence OCR support for `/documents/markdown/ocr`, install MarkItDown with the optional Azure extension:
@@ -72,6 +74,38 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Then open `http://127.0.0.1:8000/docs` for the interactive API docs.
+
+The bundled Test API front end is also served by the backend:
+
+```text
+http://127.0.0.1:8000/test-api/
+```
+
+### Windows PowerShell helper scripts
+
+From the repository root:
+
+```powershell
+.\dev-scripts\install-backend.ps1
+.\dev-scripts\run-backend.ps1
+.\dev-scripts\run-tests.ps1
+```
+
+To run the test front end as a separate static site:
+
+```powershell
+.\dev-scripts\run-test-frontend.ps1
+```
+
+Then open `http://127.0.0.1:5173`. The front end defaults to API base URL `http://127.0.0.1:8000`.
+
+### Local configuration
+
+Copy `.env.example` to `.env` if you want to configure local settings outside your shell. The API loads `.env` at startup and reads these environment variables:
+
+- `QIESI_CORS_ORIGINS`: comma-separated local origins allowed to call the API. Defaults to `http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:8000,http://localhost:8000`.
+- `QIESI_MAX_UPLOAD_BYTES`: maximum document upload size in bytes. Defaults to `26214400` (25 MB).
+- `AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT` and `AZURE_API_KEY`: optional OCR support for `/documents/markdown/ocr`.
 
 ## Endpoints
 
@@ -272,8 +306,65 @@ Sample response:
 Error notes:
 
 - Returns `400` for invalid or empty uploads.
+- Returns `400` when a `.pdf` upload does not contain a PDF file signature.
 - Returns `400` for missing JSON fields or invalid base64.
+- Returns `413` when the upload exceeds `QIESI_MAX_UPLOAD_BYTES`.
 - Returns `415` for unsupported file types.
+
+The normal response is JSON with Markdown in the `markdown` field:
+
+```json
+{
+  "fileName": "incident-report.pdf",
+  "contentType": "application/pdf",
+  "markdown": "# Converted content...",
+  "textLength": 12345,
+  "success": true
+}
+```
+
+---
+
+## Test API front end
+
+The repository includes a lightweight browser test harness in `frontend/`. It does not perform PDF-to-Markdown conversion in the browser. It sends a multipart `FormData` request directly to the backend `/documents/markdown` endpoint and displays the API response.
+
+Features:
+
+- PDF picker with drag-and-drop support
+- Configurable API base URL, defaulting to `http://127.0.0.1:8000`
+- Client-side PDF and empty-file validation
+- Loading, success, and human-readable error states
+- Markdown response viewer
+- Copy Markdown, download `.md`, and clear actions
+
+Recommended local flow:
+
+1. Start the backend:
+
+```powershell
+.\dev-scripts\run-backend.ps1
+```
+
+2. Open `http://127.0.0.1:8000/test-api/`.
+3. Select or drag in a fake Safalo Mining & Construction SHERQ incident report PDF.
+4. Click `Convert to Markdown`.
+5. Review the Markdown response, then use `Copy` or `Download .md`.
+
+To serve the static front end separately, run `./dev-scripts/run-test-frontend.ps1` and open `http://127.0.0.1:5173`. The backend CORS defaults allow this local origin.
+
+## Safalo SHERQ PDF testing
+
+The API expects real PDF bytes, rejects empty files, and rejects files with a `.pdf` extension that do not contain a PDF signature near the start of the file.
+
+Example manual API test:
+
+```powershell
+curl.exe -X POST http://127.0.0.1:8000/documents/markdown `
+  -F "file=@C:\path\to\safalo-incident-report.pdf"
+```
+
+Scanned PDFs or image-only medical reports may return little or no text through the standard endpoint. Use `/documents/markdown/ocr` with Azure Document Intelligence configured when OCR is required.
 
 ---
 
@@ -338,6 +429,14 @@ Error notes:
 - AI, RAG, and search indexing of business documents
 
 ## Testing examples
+
+### Automated tests
+
+```powershell
+.\dev-scripts\run-tests.ps1
+```
+
+The `/documents/markdown` tests cover missing uploads, unsupported types, empty and oversized uploads, invalid PDF signatures, base64 JSON requests, and the successful multipart response contract.
 
 ### JSON → XLSX
 

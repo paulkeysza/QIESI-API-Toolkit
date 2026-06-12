@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QIESI API Toolkit - Document Markdown Test</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="workspace" aria-labelledby="page-title">
+      <div class="toolbar">
+        <div>
+          <h1 id="page-title">QIESI API Toolkit - Document Markdown Test</h1>
+          <p class="subtitle">Upload a Safalo SHERQ PDF report and send it to <code>/documents/markdown</code>.</p>
+        </div>
+        <div class="status-pill" id="statusPill">Ready</div>
+      </div>
+
+      <div class="layout">
+        <form id="uploadForm" class="panel" novalidate>
+          <label class="field-label" for="apiBaseUrl">API base URL</label>
+          <input id="apiBaseUrl" name="apiBaseUrl" type="url" value="http://127.0.0.1:8000" spellcheck="false">
+
+          <label class="drop-zone" id="dropZone" for="pdfFile">
+            <input id="pdfFile" name="pdfFile" type="file" accept="application/pdf,.pdf">
+            <span class="drop-title">Select or drop a PDF report</span>
+            <span class="drop-detail" id="fileDetail">No file selected</span>
+          </label>
+
+          <div class="actions">
+            <button type="submit" id="submitButton">Convert to Markdown</button>
+            <button type="button" class="secondary" id="clearButton">Clear</button>
+          </div>
+
+          <p class="message" id="message" role="status" aria-live="polite"></p>
+        </form>
+
+        <section class="panel output-panel" aria-labelledby="output-title">
+          <div class="output-header">
+            <h2 id="output-title">Markdown response</h2>
+            <div class="output-actions">
+              <button type="button" class="secondary" id="copyButton" disabled>Copy</button>
+              <button type="button" class="secondary" id="downloadButton" disabled>Download .md</button>
+            </div>
+          </div>
+          <textarea id="markdownOutput" readonly spellcheck="false" placeholder="The returned Markdown will appear here."></textarea>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

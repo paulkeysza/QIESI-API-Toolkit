@@ -2,6 +2,8 @@ fastapi
 uvicorn
 openpyxl
 python-multipart
+python-dotenv
 pytest
-markitdown
+httpx
+markitdown[pdf]
 # Optional OCR support: pip install markitdown[az-doc-intel]

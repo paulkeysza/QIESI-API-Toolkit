@@ -14,7 +14,7 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 from dotenv import load_dotenv
 from openpyxl import Workbook
 from markitdown import MarkItDown, StreamInfo, PRIORITY_SPECIFIC_FILE_FORMAT
@@ -86,8 +86,16 @@ class MessageCSVRequest(BaseModel):
 
 
 class DocumentBase64Request(BaseModel):
+    fileName: str = Field(description="Original document file name including its extension.")
+    fileContentBase64: str = Field(description="Base64-encoded document file content.")
+
+
+class DocumentMarkdownResponse(BaseModel):
     fileName: str
-    fileContentBase64: str
+    contentType: str
+    markdown: str
+    textLength: int
+    success: bool
 
 SUPPORTED_DOCUMENT_EXTENSIONS = {
     ".pdf",
@@ -363,6 +371,7 @@ def info():
             "json_to_xlsx": "/JSON-to-XLSX",
             "text_to_csv": "/TXT-to-CSV",
             "document_to_markdown": "/documents/markdown",
+            "document_to_markdown_k2": "/documents/markdown/k2",
             "document_to_markdown_ocr": "/documents/markdown/ocr",
             "document_markdown_test_ui": "/test-api/",
             "docs": "/docs",
@@ -440,6 +449,25 @@ async def document_to_markdown(
         file_bytes=file_bytes,
         file_name=file_name,
         content_type=content_type,
+    )
+
+
+@app.post(
+    "/documents/markdown/k2",
+    tags=["Document Conversion"],
+    summary="K2 Document-to-Markdown",
+    description=(
+        "K2-friendly JSON endpoint that accepts a file name and Base64 document content, "
+        "then returns explicit Markdown response properties."
+    ),
+    response_model=DocumentMarkdownResponse,
+    operation_id="convert_document_to_markdown_k2",
+)
+def document_to_markdown_k2(payload: DocumentBase64Request):
+    return _convert_document_to_markdown(
+        file_bytes=_decode_base64_file_content(payload.fileContentBase64),
+        file_name=payload.fileName,
+        content_type=None,
     )
 
 

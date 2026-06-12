@@ -338,6 +338,33 @@ The normal response is JSON with Markdown in the `markdown` field:
 }
 ```
 
+### POST /documents/markdown/k2
+
+Purpose: Provide a K2 REST Broker-friendly JSON contract without multipart file upload modeling.
+
+Request:
+
+```json
+{
+  "fileName": "safalo-incident-report.pdf",
+  "fileContentBase64": "JVBERi0xLjQ..."
+}
+```
+
+Response:
+
+```json
+{
+  "fileName": "safalo-incident-report.pdf",
+  "contentType": "application/pdf",
+  "markdown": "# Incident Report...",
+  "textLength": 12345,
+  "success": true
+}
+```
+
+In K2, generate the Object Type for `DocumentBase64Request` and the Service Operation named `convert_document_to_markdown_k2`. Use the Service Operation SmartObject to execute the API call.
+
 ---
 
 ## Test API front end

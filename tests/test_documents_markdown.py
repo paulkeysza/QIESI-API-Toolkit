@@ -15,6 +15,17 @@ def test_openapi_includes_server_url():
     assert response.json()["servers"][0]["url"].startswith("http://127.0.0.1:")
 
 
+def test_openapi_exposes_k2_json_contract():
+    response = client.get("/openapi.json")
+    operation = response.json()["paths"]["/documents/markdown/k2"]["post"]
+
+    assert operation["operationId"] == "convert_document_to_markdown_k2"
+    assert "application/json" in operation["requestBody"]["content"]
+    assert operation["responses"]["200"]["content"]["application/json"]["schema"]["$ref"].endswith(
+        "/DocumentMarkdownResponse"
+    )
+
+
 def test_documents_markdown_requires_file_or_payload():
     response = client.post("/documents/markdown")
 
@@ -116,6 +127,32 @@ def test_documents_markdown_base64_json_success(monkeypatch):
 
     assert response.status_code == 200
     assert response.json()["markdown"] == "# Base64 report"
+
+
+def test_documents_markdown_k2_success(monkeypatch):
+    def fake_convert(file_bytes, file_name, content_type, use_ocr=False):
+        assert file_bytes == b"%PDF-1.4\n%%EOF"
+        assert file_name == "incident-report.pdf"
+        assert content_type is None
+        return {
+            "fileName": file_name,
+            "contentType": "application/pdf",
+            "markdown": "# K2 report",
+            "textLength": 11,
+            "success": True,
+        }
+
+    monkeypatch.setattr(main, "_convert_document_to_markdown", fake_convert)
+    encoded = base64.b64encode(b"%PDF-1.4\n%%EOF").decode("ascii")
+
+    response = client.post(
+        "/documents/markdown/k2",
+        json={"fileName": "incident-report.pdf", "fileContentBase64": encoded},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["markdown"] == "# K2 report"
+    assert response.json()["textLength"] == 11
 
 
 def test_documents_markdown_rejects_incomplete_json_payload():

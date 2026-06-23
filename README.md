@@ -120,7 +120,10 @@ Copy `.env.example` to `.env` if you want to configure local settings outside yo
 - `QIESI_CORS_ORIGINS`: comma-separated local origins allowed to call the API. Defaults to `http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:8000,http://localhost:8000`.
 - `QIESI_MAX_UPLOAD_BYTES`: maximum document upload size in bytes. Defaults to `26214400` (25 MB).
 - `QIESI_PUBLIC_BASE_URL`: absolute base URL advertised in OpenAPI metadata for REST clients such as K2. The interactive launcher sets this from the selected port.
+- `QIESI_LOG_LEVEL`: backend logging level. Defaults to `INFO`. Use `DEBUG` for more verbose local troubleshooting.
 - `AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT` and `AZURE_API_KEY`: optional OCR support for `/documents/markdown/ocr`.
+
+Runtime request logs are written to `logs/qiesi-api.log` and echoed to the backend terminal.
 
 ## Endpoints
 
@@ -351,6 +354,17 @@ Request:
 }
 ```
 
+The `fileContentBase64` value can be raw Base64 or the K2 file XML wrapper:
+
+```xml
+<files>
+  <file encoding="Base64">
+    <name>safalo-incident-report.pdf</name>
+    <content>JVBERi0xLjQ...</content>
+  </file>
+</files>
+```
+
 Response:
 
 ```json
@@ -358,6 +372,7 @@ Response:
   "fileName": "safalo-incident-report.pdf",
   "contentType": "application/pdf",
   "markdown": "# Incident Report...",
+  "markdownText": "# Incident Report...",
   "textLength": 12345,
   "success": true
 }
@@ -365,13 +380,59 @@ Response:
 
 In K2, generate the Object Type for `DocumentBase64Request` and the Service Operation named `document_to_markdown_k2_documents_markdown_k2_post`. Use the Service Operation SmartObject to execute the API call.
 
-For K2 REST Broker versions that ignore nested paths sharing the `/documents/markdown` prefix, use the equivalent top-level operation:
+For K2 testing with the same multipart upload behavior as `/documents/markdown`, use the equivalent top-level operation:
 
 ```text
 POST /K2-Markdown
 ```
 
-Its generated operation ID is `k2_document_to_markdown_K2_Markdown_post`. This is the preferred operation for K2 SmartObject generation.
+Its generated operation ID is `k2_document_to_markdown_K2_Markdown_post`. It accepts a multipart `file` upload and returns the same Markdown response fields.
+
+If K2 exposes a file attachment as raw XML like `<file><name>...</name><content>...</content></file>`, use:
+
+```text
+POST /K2-Markdown-Xml
+```
+
+Send the entire XML value as a plain text body, or send a JSON body with a `fileXml` property if K2 wraps the value as an object:
+
+```json
+{
+  "fileXml": "<file><name>safalo-report.pdf</name><content>JVBERi0...</content></file>"
+}
+```
+
+The API extracts the PDF file name from `<name>` and the Base64 content from `<content>`.
+
+If the K2 REST Broker does not list the plain text endpoint, use the JSON wrapper endpoint instead:
+
+```text
+POST /K2-Markdown-Xml-Json
+```
+
+Request:
+
+```json
+{
+  "fileXml": "<file><name>safalo-report.pdf</name><content>JVBERi0...</content></file>"
+}
+```
+
+This endpoint returns JSON. Some K2 REST Broker configurations do not deserialize JSON response properties and only expose `HttpResponseCode` and `HttpResponseContent`. In that case, use the Markdown-only endpoint instead:
+
+```text
+POST /K2-Markdown-Xml-Json-Text
+```
+
+It accepts the same JSON request body:
+
+```json
+{
+  "fileXml": "<file><name>safalo-report.pdf</name><content>JVBERi0...</content></file>"
+}
+```
+
+The response body is only the Markdown text with no JSON wrapper. In K2, map `HttpResponseContent` from this endpoint to your Markdown text variable.
 
 ---
 

@@ -1,0 +1,482 @@
+{
+  "info": {
+    "_postman_id": "1b4f0f24-3d2f-4b25-9ab2-7101e5176d9e",
+    "name": "QIESI API Toolkit",
+    "description": "Postman collection for testing the local QIESI API Toolkit endpoints. Set `baseUrl` to your running backend, for example `http://127.0.0.1:8123`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8123",
+      "type": "string"
+    },
+    {
+      "key": "fileName",
+      "value": "safalo-incident-report.pdf",
+      "type": "string"
+    },
+    {
+      "key": "pdfBase64",
+      "value": "PASTE_BASE64_PDF_CONTENT_HERE",
+      "type": "string"
+    },
+    {
+      "key": "pdfFilePath",
+      "value": "C:\\\\path\\\\to\\\\safalo-incident-report.pdf",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Checks that the API is running."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('health is ok', function () { pm.expect(pm.response.json().status).to.eql('ok'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["info"]
+            },
+            "description": "Returns service metadata and endpoint references."
+          }
+        },
+        {
+          "name": "Ping",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ping",
+              "host": ["{{baseUrl}}"],
+              "path": ["ping"]
+            },
+            "description": "Simple connectivity check."
+          }
+        },
+        {
+          "name": "OpenAPI Schema",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/openapi.json",
+              "host": ["{{baseUrl}}"],
+              "path": ["openapi.json"]
+            },
+            "description": "Fetches the OpenAPI descriptor used by Swagger and K2 REST service generation."
+          }
+        },
+        {
+          "name": "Swagger Docs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/docs",
+              "host": ["{{baseUrl}}"],
+              "path": ["docs"]
+            },
+            "description": "Swagger UI HTML page."
+          }
+        },
+        {
+          "name": "Test API Front End",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/test-api/",
+              "host": ["{{baseUrl}}"],
+              "path": ["test-api", ""]
+            },
+            "description": "Browser test page for uploading PDFs and viewing Markdown."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversion",
+      "item": [
+        {
+          "name": "JSON to XLSX",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonInput\": \"[{\\\"id\\\":1,\\\"name\\\":\\\"Safalo Incident\\\",\\\"status\\\":\\\"Open\\\"}]\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/JSON-to-XLSX",
+              "host": ["{{baseUrl}}"],
+              "path": ["JSON-to-XLSX"]
+            },
+            "description": "Converts JSON text into a Base64 encoded .xlsx file."
+          }
+        },
+        {
+          "name": "Text to CSV",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Incident Number: SAF-POC-001\\nLocation: Safalo Mine Shaft 3\\nStatus: Reported\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/TXT-to-CSV",
+              "host": ["{{baseUrl}}"],
+              "path": ["TXT-to-CSV"]
+            },
+            "description": "Converts plain multiline text into a Base64 encoded CSV file."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Document Markdown",
+      "item": [
+        {
+          "name": "Document to Markdown - Multipart PDF",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{pdfFilePath}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/markdown",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "markdown"]
+            },
+            "description": "Uploads a PDF using multipart/form-data and returns Markdown in the `markdown` field. In Postman, set `pdfFilePath` or manually choose the file in the Body tab after importing."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('response has markdown', function () { pm.expect(pm.response.json()).to.have.property('markdown'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Document to Markdown - JSON Base64",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"{{fileName}}\",\n  \"fileContentBase64\": \"{{pdfBase64}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/markdown",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "markdown"]
+            },
+            "description": "Calls the original Markdown endpoint with a JSON Base64 payload."
+          }
+        },
+        {
+          "name": "K2 Markdown - Multipart PDF",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{pdfFilePath}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/K2-Markdown",
+              "host": ["{{baseUrl}}"],
+              "path": ["K2-Markdown"]
+            },
+            "description": "Top-level K2 endpoint mirroring the working multipart PDF upload behavior. Choose a PDF file in the Body tab after importing if Postman does not resolve `pdfFilePath` automatically."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('response has K2-friendly fields', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('fileName');",
+                  "  pm.expect(json).to.have.property('contentType');",
+                  "  pm.expect(json).to.have.property('markdown');",
+                  "  pm.expect(json).to.have.property('textLength');",
+                  "  pm.expect(json).to.have.property('success');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nested K2 Markdown - JSON Base64",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"{{fileName}}\",\n  \"fileContentBase64\": \"{{pdfBase64}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/markdown/k2",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "markdown", "k2"]
+            },
+            "description": "Equivalent K2-friendly endpoint under the document route namespace. `fileContentBase64` may be raw Base64 or the K2 `<files><file encoding=\"Base64\"><name>...</name><content>...</content></file></files>` wrapper."
+          }
+        },
+        {
+          "name": "K2 Markdown - Raw File XML",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<file><name>{{fileName}}</name><content>{{pdfBase64}}</content></file>"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/K2-Markdown-Xml",
+              "host": ["{{baseUrl}}"],
+              "path": ["K2-Markdown-Xml"]
+            },
+            "description": "Accepts the raw XML string produced by K2 file controls, extracts `<name>` and `<content>`, then converts the Base64 PDF to Markdown."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('response has markdown', function () { pm.expect(pm.response.json()).to.have.property('markdown'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "K2 Markdown - File XML JSON to Same Endpoint",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileXml\": \"<file><name>{{fileName}}</name><content>{{pdfBase64}}</content></file>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/K2-Markdown-Xml",
+              "host": ["{{baseUrl}}"],
+              "path": ["K2-Markdown-Xml"]
+            },
+            "description": "Matches the observed K2 REST Broker payload when it posts `{ fileXml: '<file>...</file>' }` to `/K2-Markdown-Xml`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('response has markdown', function () { pm.expect(pm.response.json()).to.have.property('markdown'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "K2 Markdown - File XML JSON",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileXml\": \"<file><name>{{fileName}}</name><content>{{pdfBase64}}</content></file>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/K2-Markdown-Xml-Json",
+              "host": ["{{baseUrl}}"],
+              "path": ["K2-Markdown-Xml-Json"]
+            },
+            "description": "K2-friendly JSON wrapper for the raw file XML value. This is the preferred SmartObject route when K2 does not import text/plain endpoints."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('response has markdown', function () { pm.expect(pm.response.json()).to.have.property('markdown'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "K2 Markdown - File XML JSON Text Only",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileXml\": \"<file><name>{{fileName}}</name><content>{{pdfBase64}}</content></file>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/K2-Markdown-Xml-Json-Text",
+              "host": ["{{baseUrl}}"],
+              "path": ["K2-Markdown-Xml-Json-Text"]
+            },
+            "description": "K2-friendly JSON wrapper for raw file XML that returns only Markdown text. In K2, map HttpResponseContent from this endpoint."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('response is markdown text only', function () { pm.expect(pm.response.text()).to.not.match(/^\\s*\\{/); });"
+                ]
+              }
+            }
+          ]
+        },        {
+          "name": "Document OCR to Markdown - Multipart PDF",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{pdfFilePath}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/markdown/ocr",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "markdown", "ocr"]
+            },
+            "description": "Optional OCR endpoint. Requires MarkItDown Azure Document Intelligence dependencies and Azure environment variables."
+          }
+        },
+        {
+          "name": "Document OCR to Markdown - JSON Base64",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"{{fileName}}\",\n  \"fileContentBase64\": \"{{pdfBase64}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/markdown/ocr",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "markdown", "ocr"]
+            },
+            "description": "Optional OCR endpoint using JSON Base64 input. Requires Azure Document Intelligence configuration."
+          }
+        }
+      ]
+    }
+  ]
+}
